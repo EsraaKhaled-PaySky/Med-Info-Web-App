@@ -1,0 +1,36 @@
+<!-- templates/dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Drug Info Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome, {{ user['email'] }}</h1>
+
+        <form action="{{ url_for('dashboard') }}" method="POST">
+            <label for="medicine">Search for a medicine:</label>
+            <input type="text" name="medicine" id="medicine" required>
+            <button type="submit">Search</button>
+        </form>
+
+        {% if medicine %}
+            <div class="result">
+                <h2>{{ medicine['name'] }}</h2>
+                <p><strong>Indications:</strong> {{ medicine['indications'] }}</p>
+                <p><strong>Dosage (Adult):</strong> {{ medicine['dosage'].get('adult', 'N/A') }}</p>
+                <p><strong>Dosage (Pediatric):</strong> {{ medicine['dosage'].get('pediatric', 'N/A') }}</p>
+                <p><strong>Contraindications:</strong> {{ medicine['contraindications'] }}</p>
+                <p><strong>Adverse Effects:</strong> {{ medicine['adverse_effects'] }}</p>
+            </div>
+        {% elif searched %}
+            <p>No medicine found matching your search.</p>
+        {% endif %}
+
+        <p><a href="{{ url_for('logout') }}">Logout</a></p>
+    </div>
+</body>
+</html>
