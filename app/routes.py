@@ -4,7 +4,13 @@ from flask_login import login_user, logout_user, login_required
 from .models import User
 from bson.objectid import ObjectId
 
+# ✅ DEFINE BLUEPRINT FIRST
 main = Blueprint('main', __name__)
+
+# ✅ NOW USE ROUTES
+@main.route('/')
+def home():
+    return 'Welcome to the Med Info Web App!'
 
 @main.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -36,3 +42,4 @@ def dashboard():
 def logout():
     logout_user()
     return redirect(url_for('main.login'))
+

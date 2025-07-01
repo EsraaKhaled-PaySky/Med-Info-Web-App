@@ -11,7 +11,7 @@ login_manager = LoginManager()
 
 def create_app():
     load_dotenv()
-    app = Flask(__name__, template_folder=os.path.join(os.pardir, 'templates'))
+    app = Flask(__name__, template_folder=os.path.join(os.pardir, 'templates'))  # For Replit or sandbox use
     app.config['MONGO_URI'] = os.getenv('MONGO_URI')
     app.secret_key = os.getenv('SECRET_KEY')
 
@@ -23,3 +23,4 @@ def create_app():
     app.register_blueprint(main)
 
     return app
+
