@@ -28,15 +28,17 @@ def create_app():
 
     # User loader for Flask-Login
     from .models import User
-
     @login_manager.user_loader
     def load_user(user_id):
         user = mongo.db.users.find_one({"_id": user_id})
         return User(user) if user else None
 
-    # Register routes
+    # Register your blueprints here
     from .routes import main
     app.register_blueprint(main)
+
+    from .medicine_routes import medicine_bp  # ✅ Register the medicine routes
+    app.register_blueprint(medicine_bp)
 
     return app
 

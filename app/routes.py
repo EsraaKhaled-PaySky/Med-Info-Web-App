@@ -7,10 +7,12 @@ from bson.objectid import ObjectId
 # ✅ DEFINE BLUEPRINT FIRST
 main = Blueprint('main', __name__)
 
-# ✅ NOW USE ROUTES
+# ✅ HOME PAGE
 @main.route('/')
 def home():
-    return render_template('home.html')  
+    return render_template('home.html')
+
+# ✅ SIGNUP
 @main.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -20,6 +22,7 @@ def signup():
         return redirect(url_for('main.login'))
     return render_template('signup.html')
 
+# ✅ LOGIN
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -31,14 +34,29 @@ def login():
         flash("Invalid credentials.")
     return render_template('login.html')
 
+# ✅ DASHBOARD
 @main.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('dashboard.html')
 
+# ✅ LOGOUT
 @main.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('main.login'))
+
+# ✅ SEARCH
+@main.route('/search', methods=['GET', 'POST'])
+@login_required
+def search():
+    results = []
+    if request.method == 'POST':
+        query = request.form.get('query', '').strip()
+        if query:
+            results = list(mongo.db.medicines.find({
+                "name": {"$regex": query, "$options": "i"}
+            }))
+    return render_template('search.html', results=results)
 
