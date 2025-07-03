@@ -10,8 +10,7 @@ main = Blueprint('main', __name__)
 # ✅ NOW USE ROUTES
 @main.route('/')
 def home():
-    return 'Welcome to the Med Info Web App!'
-
+    return render_template('home.html')  
 @main.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':

@@ -1,20 +1,30 @@
-.menu {
-    text-align: center;
-    margin-top: 50px;
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
 }
-.menu ul {
-    list-style: none;
+
+.menu {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.nav-links {
+    list-style-type: none;
     padding: 0;
 }
-.menu li {
+
+.nav-links li {
     margin: 15px 0;
 }
-.menu a {
+
+.nav-links a {
     text-decoration: none;
     color: #007BFF;
     font-size: 18px;
 }
-.menu a:hover {
+
+.nav-links a:hover {
     text-decoration: underline;
 }
 
