@@ -4,14 +4,21 @@
 
 {% block content %}
 <div class="menu">
-    <h2>Welcome to Med Info App</h2>
     <p>Please choose an action:</p>
-    <ul class="nav-links">
+    <ul>
         <li><a href="{{ url_for('main.login') }}">Login</a></li>
         <li><a href="{{ url_for('main.signup') }}">Sign Up</a></li>
         <li><a href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
         <li><a href="{{ url_for('main.logout') }}">Logout</a></li>
     </ul>
+
+    <hr>
+
+    <h3>Search for Medicine</h3>
+    <form action="{{ url_for('medicine.search') }}" method="get">
+        <input type="text" name="query" placeholder="Enter medicine name" required>
+        <button type="submit">Search</button>
+    </form>
 </div>
 {% endblock %}
 
