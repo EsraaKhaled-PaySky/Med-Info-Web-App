@@ -1,25 +1,13 @@
-<!-- templates/search.html -->
 {% extends "base.html" %}
 
 {% block title %}Search - Med Info App{% endblock %}
 
 {% block content %}
-<h2>Search for Medicine</h2>
-<form method="POST">
-  <input type="text" name="query" placeholder="Enter medicine name">
-  <button type="submit">Search</button>
-</form>
-
-{% if results is defined %}
-  {% if results %}
-    <ul>
-      {% for medicine in results %}
-        <li>{{ medicine['name'] }}</li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No results found.</p>
-  {% endif %}
-{% endif %}
+<div class="card">
+    <h2>Search for a Medicine</h2>
+    <form method="POST">
+        <input type="text" name="medicine" placeholder="Enter medicine name" required>
+        <input type="submit" value="Search">
+    </form>
+</div>
 {% endblock %}
-

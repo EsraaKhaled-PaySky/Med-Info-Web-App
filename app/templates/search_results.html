@@ -1,40 +1,29 @@
 {% extends "base.html" %}
 
-{% block title %}Search Results{% endblock %}
+{% block title %}Search Results - Med Info App{% endblock %}
 
 {% block content %}
-  <div class="container">
-    <h2>Search Results</h2>
+<div class="card">
+    <h2>Search Results for "{{ query }}"</h2>
 
-    {% if error %}
-      <p style="color: red;">{{ error }}</p>
-    {% endif %}
-
-    {% if fda %}
-      <div>
-        <h3>FDA Drug Info</h3>
-        <p><strong>Purpose:</strong> {{ fda.purpose[0] if fda.purpose else 'N/A' }}</p>
-        <p><strong>Usage:</strong> {{ fda.indications_and_usage[0] if fda.indications_and_usage else 'N/A' }}</p>
-        <p><strong>Dosage:</strong> {{ fda.dosage_and_administration[0] if fda.dosage_and_administration else 'N/A' }}</p>
-      </div>
-    {% else %}
-      <p>No FDA data found for this drug.</p>
-    {% endif %}
-
-    {% if interactions %}
-      <div>
-        <h3>Drug Interactions</h3>
+    {% if results %}
         <ul>
-          {% for group in interactions %}
-            {% for interaction in group.interactionType[0].interactionPair %}
-              <li>{{ interaction.description }}</li>
+            {% for med in results %}
+                <li>
+                    <strong>{{ med.name }}</strong><br>
+                    <small><strong>Indications:</strong> {{ med.indications }}</small><br>
+                    <small><strong>Adult Dosage:</strong> {{ med.dosage.adult if med.dosage.adult else 'N/A' }}</small><br>
+                    <small><strong>Contraindications:</strong> {{ med.contraindications }}</small>
+                </li>
+                <br>
             {% endfor %}
-          {% endfor %}
         </ul>
-      </div>
     {% else %}
-      <p>No interaction data found.</p>
+        <p>No medicines found matching your search.</p>
     {% endif %}
-  </div>
+
+    <br>
+    <a href="{{ url_for('main.dashboard') }}" class="button-link">New Search</a>
+    </div>
 {% endblock %}
 
