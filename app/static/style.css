@@ -1,166 +1,357 @@
+/* Enhanced Background */
+
 body {
-  font-family: 'Open Sans', sans-serif;
-  background: #f0f4f8;
-  color: #333;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px;
+    font-family: 'Open Sans', sans-serif;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    min-height: 100vh;
+    margin: 0;
+    
+    /* Medical themed background */
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.1) 0%, rgba(80, 227, 194, 0.1) 100%),
+                linear-gradient(45deg, #f0f4f8 0%, #e8f5e8 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="medical-pattern" patternUnits="userSpaceOnUse" width="20" height="20"><circle cx="10" cy="10" r="0.8" fill="rgba(76, 175, 80, 0.08)"/><path d="M8 10h4M10 8v4" stroke="rgba(76, 175, 80, 0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23medical-pattern)"/></svg>');
+    background-size: 100%, 100%, 40px 40px;
+    background-attachment: fixed;
+    position: relative;
 }
 
+/* Subtle overlay for depth */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 80%, rgba(76, 175, 80, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(33, 150, 243, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Headers */
 h1, h2 {
-  color: #4CAF50;
+    color: #4CAF50;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
-nav ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 15px;
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
-nav a {
-  text-decoration: none;
-  color: #4CAF50;
-  font-weight: bold;
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
 }
 
-nav a:hover {
-  text-decoration: underline;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  margin-top: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  width: 300px;
-  text-align: center;
-}
-
-input[type="text"] {
-  padding: 8px;
-  width: 70%;
-  margin-right: 5px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-input[type="submit"], button {
-  padding: 8px 12px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-input[type="submit"]:hover, button:hover {
-  background: #45a049;
-}
-
-footer {
-  margin-top: 50px;
-  font-size: 0.9em;
-  color: #666;
-}
-
-.result {
-  background: #f9f9f9;
-  padding: 15px;
-  border-radius: 6px;
-  margin-top: 15px;
-}
-.card p {
-  text-align: left;
-  margin: 8px 0;
-}
-
-a.btn {
-  display: inline-block;
-  padding: 8px 12px;
-  background: #4CAF50;
-  color: white;
-  text-decoration: none;
-  border-radius: 4px;
-}
-
-a.btn:hover {
-  background: #45a049;
-}
-
-.flash-messages {
-  width: 90%;
-  max-width: 400px;
-  margin-top: 20px;
-}
-
-.flash {
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  text-align: center;
-}
-
-.flash.success {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.flash.danger {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.flash.info {
-  background-color: #cce5ff;
-  color: #004085;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    background: #f9f9f9;
-}
-
+/* Navigation */
 nav ul {
     list-style: none;
     padding: 0;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 15px 25px;
+    margin: 20px 0;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.2);
 }
 
 nav ul li {
     display: inline;
-    margin-right: 15px;
 }
 
+nav a {
+    text-decoration: none;
+    color: #4CAF50;
+    font-weight: bold;
+    padding: 8px 15px;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+nav a:hover {
+    background: rgba(76, 175, 80, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(76, 175, 80, 0.2);
+    text-decoration: none;
+}
+
+/* Cards with glass morphism */
 .card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(15px);
+    padding: 30px;
+    margin-top: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    width: 100%;
     max-width: 400px;
-    margin: 40px auto;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    text-align: center;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    position: relative;
+    overflow: hidden;
 }
 
+.card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, rgba(76, 175, 80, 0.1), rgba(33, 150, 243, 0.1));
+    border-radius: 15px;
+    z-index: -1;
+}
+
+.card p {
+    text-align: left;
+    margin: 12px 0;
+    line-height: 1.5;
+}
+
+/* Form inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"] {
+    padding: 12px 15px;
+    width: 70%;
+    margin-right: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* Buttons */
+input[type="submit"], 
+button,
+a.btn {
+    display: inline-block;
+    padding: 12px 20px;
+    background: linear-gradient(45deg, #4CAF50, #66BB6A);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    font-size: 1rem;
+}
+
+input[type="submit"]:hover, 
+button:hover,
+a.btn:hover {
+    background: linear-gradient(45deg, #66BB6A, #4CAF50);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+/* Footer */
+footer {
+    margin-top: 50px;
+    font-size: 0.9em;
+    color: #666;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(76, 175, 80, 0.1);
+    max-width: 600px;
+    width: 100%;
+}
+
+/* Results */
+.result {
+    background: rgba(249, 249, 249, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 15px;
+    border: 1px solid rgba(76, 175, 80, 0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Flash messages */
 .flash-messages {
+    width: 90%;
     max-width: 400px;
     margin: 20px auto;
 }
 
 .flash {
-    padding: 10px;
-    border-radius: 5px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
     text-align: center;
-    margin-bottom: 10px;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .flash.success {
-    background-color: #d4edda;
+    background: rgba(212, 237, 218, 0.9);
     color: #155724;
+    border-color: rgba(76, 175, 80, 0.3);
 }
 
 .flash.danger {
-    background-color: #f8d7da;
+    background: rgba(248, 215, 218, 0.9);
     color: #721c24;
+    border-color: rgba(244, 67, 54, 0.3);
+}
+
+.flash.info {
+    background: rgba(204, 229, 255, 0.9);
+    color: #004085;
+    border-color: rgba(33, 150, 243, 0.3);
+}
+
+/* Floating medical icons (optional) */
+.medical-icons {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -2;
+}
+
+.medical-icon {
+    position: absolute;
+    opacity: 0.02;
+    font-size: 2rem;
+    color: #4CAF50;
+    animation: float 12s infinite ease-in-out;
+}
+
+.medical-icon:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+.medical-icon:nth-child(2) { top: 20%; right: 15%; animation-delay: 3s; }
+.medical-icon:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 6s; }
+.medical-icon:nth-child(4) { bottom: 20%; right: 10%; animation-delay: 9s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 20px 10px;
+    }
+    
+    nav ul {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+    }
+    
+    nav a {
+        display: block;
+        text-align: center;
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .card {
+        width: 90%;
+        max-width: 350px;
+        padding: 20px;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"] {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    input[type="submit"], 
+    button,
+    a.btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+
+/* Additional utility classes */
+.text-center {
+    text-align: center;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+/* Medicine search specific styles */
+.medicine-list {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.medicine-item {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.medicine-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.2);
+}
+
+.medicine-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #4CAF50;
+    margin-bottom: 10px;
+}
+
+.medicine-details {
+    color: #666;
+    line-height: 1.6;
 }
