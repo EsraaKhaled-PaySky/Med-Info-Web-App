@@ -1,5 +1,132 @@
 {% extends "base.html" %}
 
+<!-- {% block title %}Search Results - Med Info App{% endblock %} -->
+
+{% block content %}
+<div class="card">
+    <h2>Search Results for "{{ query }}"</h2>
+
+    {% if fda or interactions %}
+        <div class="search-results">
+            {% if fda %}
+                <div class="fda-section">
+                    <h3>FDA Drug Information</h3>
+                    <div class="drug-info">
+                        {% if fda.openfda and fda.openfda.brand_name %}
+                            <p><strong>Brand Name:</strong> {{ fda.openfda.brand_name[0] }}</p>
+                        {% endif %}
+                        
+                        {% if fda.openfda and fda.openfda.generic_name %}
+                            <p><strong>Generic Name:</strong> {{ fda.openfda.generic_name[0] }}</p>
+                        {% endif %}
+                        
+                        {% if fda.indications_and_usage %}
+                            <p><strong>Indications and Usage:</strong> {{ fda.indications_and_usage[0][:500] }}...</p>
+                        {% endif %}
+                        
+                        {% if fda.dosage_and_administration %}
+                            <p><strong>Dosage and Administration:</strong> {{ fda.dosage_and_administration[0][:500] }}...</p>
+                        {% endif %}
+                        
+                        {% if fda.warnings %}
+                            <p><strong>Warnings:</strong> {{ fda.warnings[0][:500] }}...</p>
+                        {% endif %}
+                        
+                        {% if fda.contraindications %}
+                            <p><strong>Contraindications:</strong> {{ fda.contraindications[0][:500] }}...</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if interactions %}
+                <div class="interactions-section">
+                    <h3>Drug Interactions</h3>
+                    <div class="interactions-list">
+                        {% for interaction in interactions %}
+                            <div class="interaction-item">
+                                <p>{{ interaction }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% elif error %}
+        <div class="error-message">
+            <p>{{ error }}</p>
+        </div>
+    {% else %}
+        <div class="no-results">
+            <p>No information found for "{{ query }}".</p>
+            <p>This might be because:</p>
+            <ul>
+                <li>The drug name is misspelled</li>
+                <li>The drug is not in the FDA database</li>
+                <li>There was an issue with the API connection</li>
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="actions">
+        <a href="{{ url_for('main.dashboard') }}" class="button-link">New Search</a>
+    </div>
+</div>
+
+<style>
+.search-results {
+    margin-top: 20px;
+}
+
+.fda-section, .interactions-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.drug-info p {
+    margin-bottom: 15px;
+}
+
+.interactions-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.interaction-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    border-left: 4px solid #007bff;
+}
+
+.error-message {
+    color: #dc3545;
+    padding: 20px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+}
+
+.no-results {
+    padding: 20px;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 5px;
+}
+
+.actions {
+    margin-top: 20px;
+    text-align: center;
+}
+</style>
+{% endblock %}
+
+
+
+<!-- {% extends "base.html" %}
+
 {% block title %}Search Results - Med Info App{% endblock %}
 
 {% block content %}
@@ -26,4 +153,4 @@
     <a href="{{ url_for('main.dashboard') }}" class="button-link">New Search</a>
     </div>
 {% endblock %}
-
+ -->

@@ -1,5 +1,3 @@
-# utils.py
-
 import re
 
 def is_valid_email(email):

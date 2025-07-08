@@ -1,4 +1,3 @@
-# app/utils/api_clients.py
 import os
 import requests
 from dotenv import load_dotenv
