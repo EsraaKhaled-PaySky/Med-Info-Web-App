@@ -16,13 +16,12 @@
 
 import binascii
 
-import dns.rdata
 import dns.immutable
+import dns.rdata
 
 
 @dns.immutable.immutable
 class EUIBase(dns.rdata.Rdata):
-
     """EUIxx record"""
 
     # see: rfc7043.txt

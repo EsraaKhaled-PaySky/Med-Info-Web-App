@@ -17,13 +17,12 @@
 
 import dns.exception
 import dns.immutable
-import dns.rdata
 import dns.name
+import dns.rdata
 
 
 @dns.immutable.immutable
 class RP(dns.rdata.Rdata):
-
     """RP record"""
 
     # see: RFC 1183

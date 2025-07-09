@@ -1,17 +1,463 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Med Info App{% endblock %}
+{% block title %}MedInfo Pro - Advanced Medicine Information System{% endblock %}
 
 {% block content %}
-<div class="card">
-    {% if current_user.is_authenticated %}
-        <h2>Welcome back, {{ current_user.username }}!</h2>
-        <a href="{{ url_for('main.dashboard') }}" class="button-link">Go to Dashboard</a>
-        <a href="{{ url_for('main.logout') }}" class="button-link">Logout</a>
-    {% else %}
-        <h2>Welcome to Med Info App</h2>
-    
-    {% endif %}
-</div>
-{% endblock %}
+<style>
+    .hero-section {
+        text-align: center;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
 
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #008080;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: #000000;
+        margin-bottom: 2rem;
+        font-weight: 500;
+        line-height: 1.5;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #008080;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin: 2.5rem 0;
+    }
+
+    .feature-card {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 2px solid #008080;
+        transition: all 0.3s ease;
+        position: relative;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        border-color: #228B22;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #008080;
+    }
+
+    .feature-card:nth-child(2) .feature-icon {
+        color: #DC143C;
+    }
+
+    .feature-card:nth-child(3) .feature-icon {
+        color: #0066CC;
+    }
+
+    .feature-card:nth-child(4) .feature-icon {
+        color: #228B22;
+    }
+
+    .feature-card:nth-child(5) .feature-icon {
+        color: #0066CC;
+    }
+
+    .feature-card:nth-child(6) .feature-icon {
+        color: #008080;
+    }
+
+    .feature-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        color: #000000;
+    }
+
+    .feature-description {
+        color: #333333;
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+
+    .cta-section {
+        margin-top: 2.5rem;
+        text-align: center;
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .cta-section h2 {
+        color: #000000;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+    }
+
+    .btn {
+        padding: 0.8rem 1.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background-color: #008080;
+        color: #ffffff;
+        border-color: #008080;
+    }
+
+    .btn-primary:hover {
+        background-color: #006666;
+        border-color: #006666;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        color: #000000;
+        border-color: #000000;
+    }
+
+    .btn-outline:hover {
+        background-color: #000000;
+        color: #ffffff;
+    }
+
+    .btn-block {
+        background-color: #228B22;
+        color: #ffffff;
+        border-color: #228B22;
+    }
+
+    .btn-block:hover {
+        background-color: #1F7A1F;
+        border-color: #1F7A1F;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .stat-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: #ffffff;
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        border-color: #008080;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card:nth-child(1) {
+        border-color: #008080;
+    }
+
+    .stat-card:nth-child(2) {
+        border-color: #228B22;
+    }
+
+    .stat-card:nth-child(3) {
+        border-color: #0066CC;
+    }
+
+    .stat-card:nth-child(4) {
+        border-color: #DC143C;
+    }
+
+    .stat-number {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #000000;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card:nth-child(1) .stat-number {
+        color: #008080;
+    }
+
+    .stat-card:nth-child(2) .stat-number {
+        color: #228B22;
+    }
+
+    .stat-card:nth-child(3) .stat-number {
+        color: #0066CC;
+    }
+
+    .stat-card:nth-child(4) .stat-number {
+        color: #DC143C;
+    }
+
+    .stat-label {
+        color: #333333;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
+    }
+
+    .floating-elements {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: -1;
+    }
+
+    .floating-pill {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        background: rgba(0, 128, 128, 0.1);
+        border-radius: 50%;
+        border: 2px solid rgba(0, 128, 128, 0.2);
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .floating-pill:nth-child(1) {
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+        background: rgba(0, 128, 128, 0.1);
+        border-color: rgba(0, 128, 128, 0.2);
+    }
+
+    .floating-pill:nth-child(2) {
+        top: 60%;
+        left: 80%;
+        animation-delay: 3s;
+        background: rgba(34, 139, 34, 0.1);
+        border-color: rgba(34, 139, 34, 0.2);
+    }
+
+    .floating-pill:nth-child(3) {
+        top: 80%;
+        left: 20%;
+        animation-delay: 6s;
+        background: rgba(0, 102, 204, 0.1);
+        border-color: rgba(0, 102, 204, 0.2);
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-15px);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .cta-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<div class="floating-elements">
+    <div class="floating-pill"></div>
+    <div class="floating-pill"></div>
+    <div class="floating-pill"></div>
+</div>
+
+{% if current_user.is_authenticated %}
+<div class="hero-section">
+    <h1 class="hero-title">Welcome Back, {{ current_user.username }}!</h1>
+    <p class="hero-subtitle">
+        Ready to explore comprehensive medicine information? Access FDA-approved drug data,
+        interaction warnings, and detailed pharmaceutical insights.
+    </p>
+
+    <div class="cta-section">
+        <div class="cta-buttons">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-block">
+                <i class="fas fa-search"></i> Go to Dashboard
+            </a>
+            <a href="{{ url_for('main.logout') }}" class="btn btn-outline">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-number">10K+</span>
+            <p class="stat-label">FDA Approved Drugs</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">500K+</span>
+            <p class="stat-label">Drug Interactions</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">24/7</span>
+            <p class="stat-label">Real-time Updates</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">99.9%</span>
+            <p class="stat-label">Data Accuracy</p>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="hero-section">
+    <h1 class="hero-title">MedInfo Pro</h1>
+    <p class="hero-subtitle">
+        Your comprehensive medicine information system. Access FDA-approved drug data,
+        drug interactions, side effects, and pharmaceutical insights all in one place.
+    </p>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-pills"></i>
+            </div>
+            <h3 class="feature-title">FDA Drug Database</h3>
+            <p class="feature-description">
+                Access comprehensive information on thousands of FDA-approved medications,
+                including indications, dosages, and safety information.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="feature-title">Drug Interactions</h3>
+            <p class="feature-description">
+                Get real-time alerts about potential drug interactions, contraindications,
+                and safety warnings to ensure patient safety.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3 class="feature-title">Advanced Search</h3>
+            <p class="feature-description">
+                Powerful search capabilities with brand names, generic names, and
+                intelligent suggestions for accurate results.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 class="feature-title">Secure & Reliable</h3>
+            <p class="feature-description">
+                Enterprise-grade security with encrypted data transmission and
+                reliable uptime for critical medical information access.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h3 class="feature-title">Mobile Responsive</h3>
+            <p class="feature-description">
+                Access medical information anywhere, anytime with our fully responsive
+                design optimized for all devices.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+            <h3 class="feature-title">Real-time Updates</h3>
+            <p class="feature-description">
+                Stay current with the latest FDA updates, new drug approvals,
+                and safety alerts delivered in real-time.
+            </p>
+        </div>
+    </div>
+
+    <div class="cta-section">
+        <h2>Ready to Get Started?</h2>
+        <div class="cta-buttons">
+            <a href="{{ url_for('main.signup') }}" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Create Account
+            </a>
+            <a href="{{ url_for('main.login') }}" class="btn btn-outline">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-number">10K+</span>
+            <p class="stat-label">FDA Approved Drugs</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">500K+</span>
+            <p class="stat-label">Drug Interactions</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">24/7</span>
+            <p class="stat-label">Real-time Updates</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">99.9%</span>
+            <p class="stat-label">Data Accuracy</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

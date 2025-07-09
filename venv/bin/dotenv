@@ -1,4 +1,4 @@
-#!/home/kodeklan/Med-Info-Web-App/venv/bin/python3
+#!/home/kodeklan/Med-Info-Web-App/Med-Info-Web-App/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

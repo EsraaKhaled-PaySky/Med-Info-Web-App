@@ -17,13 +17,12 @@
 
 import struct
 
-import dns.rdtypes.mxbase
 import dns.immutable
+import dns.rdtypes.mxbase
 
 
 @dns.immutable.immutable
 class A(dns.rdata.Rdata):
-
     """A record for Chaosnet"""
 
     # domain: the domain of the address

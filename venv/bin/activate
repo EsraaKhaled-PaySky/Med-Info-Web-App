@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV=/home/kodeklan/Med-Info-Web-App/venv
+VIRTUAL_ENV=/home/kodeklan/Med-Info-Web-App/Med-Info-Web-App/venv
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

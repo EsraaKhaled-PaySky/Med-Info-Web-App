@@ -1,5 +1,3 @@
-# openfda_import.py
-
 import requests
 from app.db import drug_collection  # adjust if your db.py is elsewhere
 

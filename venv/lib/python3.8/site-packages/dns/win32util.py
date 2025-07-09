@@ -1,7 +1,8 @@
 import sys
 
-if sys.platform == "win32":
+import dns._features
 
+if sys.platform == "win32":
     from typing import Any
 
     import dns.name
@@ -16,13 +17,14 @@ if sys.platform == "win32":
     except KeyError:
         WindowsError = Exception
 
-    try:
+    if dns._features.have("wmi"):
         import threading
+
         import pythoncom  # pylint: disable=import-error
         import wmi  # pylint: disable=import-error
 
         _have_wmi = True
-    except Exception:
+    else:
         _have_wmi = False
 
     def _config_domain(domain):
@@ -51,9 +53,10 @@ if sys.platform == "win32":
                 try:
                     system = wmi.WMI()
                     for interface in system.Win32_NetworkAdapterConfiguration():
-                        if interface.IPEnabled and interface.DNSDomain:
-                            self.info.domain = _config_domain(interface.DNSDomain)
+                        if interface.IPEnabled and interface.DNSServerSearchOrder:
                             self.info.nameservers = list(interface.DNSServerSearchOrder)
+                            if interface.DNSDomain:
+                                self.info.domain = _config_domain(interface.DNSDomain)
                             if interface.DNSDomainSuffixSearchOrder:
                                 self.info.search = [
                                     _config_domain(x)
@@ -206,7 +209,7 @@ if sys.platform == "win32":
             lm = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
             try:
                 tcp_params = winreg.OpenKey(
-                    lm, r"SYSTEM\CurrentControlSet" r"\Services\Tcpip\Parameters"
+                    lm, r"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
                 )
                 try:
                     self._config_fromkey(tcp_params, True)
@@ -214,9 +217,7 @@ if sys.platform == "win32":
                     tcp_params.Close()
                 interfaces = winreg.OpenKey(
                     lm,
-                    r"SYSTEM\CurrentControlSet"
-                    r"\Services\Tcpip\Parameters"
-                    r"\Interfaces",
+                    r"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces",
                 )
                 try:
                     i = 0

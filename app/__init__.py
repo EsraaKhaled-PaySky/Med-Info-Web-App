@@ -5,6 +5,10 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
+from flask_mail import Mail
+
+# Initialize Flask-Mail
+mail = Mail()
 
 # Load environment variables
 load_dotenv()
@@ -19,6 +23,17 @@ def create_app():
     app = Flask(__name__, template_folder="templates")
     app.config['MONGO_URI'] = os.getenv('MONGO_URI')
     app.secret_key = os.getenv('SECRET_KEY')
+
+    # ✅ EMAIL CONFIGURATION
+    app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+    app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
+    app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+    app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+    
+    # Initialize extensions
+    mail.init_app(app)
 
     # Initialize with app
     mongo.init_app(app)

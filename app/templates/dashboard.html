@@ -1,17 +1,679 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Med Info App{% endblock %}
+{% block title %}Dashboard - MedInfo Pro{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2>Welcome, {{ current_user.username }}</h2>
+<style>
+    :root {
+        --primary-blue: #2563eb;
+        --primary-dark: #1e40af;
+        --secondary-gray: #64748b;
+        --accent-teal: #0f766e;
+        --text-primary: #1e293b;
+        --text-secondary: #475569;
+        --text-muted: #94a3b8;
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8fafc;
+        --bg-tertiary: #f1f5f9;
+        --border-light: #e2e8f0;
+        --border-medium: #cbd5e1;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --success-green: #059669;
+        --warning-amber: #d97706;
+        --danger-red: #dc2626;
+    }
 
-    <form method="POST" action="{{ url_for('main.search') }}">
-        <input type="text" name="query" placeholder="Search for a medicine..." required><br><br>
-        <input type="submit" value="Search">
-    </form>
+    body {
+        background-color: var(--bg-secondary);
+        min-height: 100vh;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        color: var(--text-primary);
+        line-height: 1.6;
+    }
 
-    <br>
-    <a href="{{ url_for('main.logout') }}">Logout</a>
+    .dashboard-container {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid var(--border-light);
+    }
+
+    .dashboard-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .dashboard-title i {
+        color: var(--primary-blue);
+    }
+
+    .dashboard-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        font-weight: 400;
+    }
+
+    .search-section {
+        background: var(--bg-primary);
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-light);
+        margin-bottom: 3rem;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        align-items: end;
+        margin-bottom: 2rem;
+    }
+
+    .search-group {
+        flex: 1;
+    }
+
+    .search-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid var(--border-medium);
+        border-radius: 8px;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .search-input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .search-btn {
+        padding: 1rem 2rem;
+        background: var(--primary-blue);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .search-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+    .search-btn:active {
+        transform: translateY(0);
+    }
+
+    .search-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .search-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .suggestion-tag {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid var(--border-light);
+        font-weight: 500;
+    }
+
+    .suggestion-tag:hover {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: var(--bg-primary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-light);
+        transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .stat-card:nth-child(1) .stat-icon {
+        background: var(--primary-blue);
+    }
+
+    .stat-card:nth-child(2) .stat-icon {
+        background: var(--danger-red);
+    }
+
+    .stat-card:nth-child(3) .stat-icon {
+        background: var(--accent-teal);
+    }
+
+    .stat-card:nth-child(4) .stat-icon {
+        background: var(--success-green);
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .recent-searches {
+        background: var(--bg-primary);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-light);
+        margin-bottom: 3rem;
+    }
+
+    .recent-searches h3 {
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .recent-searches h3 i {
+        color: var(--secondary-gray);
+    }
+
+    .search-history {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .search-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: 1px solid var(--border-light);
+    }
+
+    .search-item:hover {
+        background: var(--bg-secondary);
+        transform: translateX(4px);
+    }
+
+    .search-item-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: var(--secondary-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .search-item-info {
+        flex: 1;
+    }
+
+    .search-item-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+    }
+
+    .search-item-time {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .search-item-arrow {
+        color: var(--text-muted);
+        font-size: 1.2rem;
+        transition: transform 0.2s ease;
+    }
+
+    .search-item:hover .search-item-arrow {
+        transform: translateX(4px);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--text-muted);
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 3rem;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .action-btn:hover {
+        background: var(--bg-tertiary);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--border-medium);
+    }
+
+    .action-btn i {
+        font-size: 1.1rem;
+        color: var(--secondary-gray);
+    }
+
+    .user-profile {
+        background: var(--bg-primary);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-light);
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--primary-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .profile-info h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
+
+    .profile-info p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .profile-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--secondary-gray);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .profile-btn:hover {
+        transform: translateY(-1px);
+        opacity: 0.9;
+    }
+
+    .profile-btn:last-child {
+        background: var(--danger-red);
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+
+        .search-form {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-btn {
+            width: 100%;
+        }
+
+        .quick-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .quick-actions {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-actions {
+            flex-direction: column;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .quick-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .search-section {
+            padding: 1.5rem;
+        }
+
+        .dashboard-title {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">
+            <i class="fas fa-tachometer-alt"></i>
+            Medicine Information Dashboard
+        </h1>
+        <p class="dashboard-subtitle">
+            Search comprehensive drug information, interactions, and FDA data
+        </p>
+    </div>
+
+    <div class="search-section">
+        <form method="POST" action="{{ url_for('medicine.search') }}" id="searchForm" class="search-form">
+            <div class="search-group">
+                <label for="query" class="search-label">
+                    <i class="fas fa-search"></i> Search for Medicine
+                </label>
+                <input type="text" id="query" name="query" class="search-input"
+                    placeholder="Enter drug name (e.g., aspirin, ibuprofen, lisinopril)" required autocomplete="off">
+            </div>
+            <button type="submit" class="search-btn" id="searchBtn">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </form>
+
+        <div class="search-suggestions">
+            <span style="color: var(--text-secondary); font-size: 0.9rem; margin-right: 1rem;">Popular searches:</span>
+            <span class="suggestion-tag" onclick="fillSearch('aspirin')">Aspirin</span>
+            <span class="suggestion-tag" onclick="fillSearch('ibuprofen')">Ibuprofen</span>
+            <span class="suggestion-tag" onclick="fillSearch('lisinopril')">Lisinopril</span>
+            <span class="suggestion-tag" onclick="fillSearch('metformin')">Metformin</span>
+            <span class="suggestion-tag" onclick="fillSearch('omeprazole')">Omeprazole</span>
+            <span class="suggestion-tag" onclick="fillSearch('atorvastatin')">Atorvastatin</span>
+        </div>
+    </div>
+
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">10,000+</div>
+                    <div class="stat-label">FDA Approved Drugs</div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">500,000+</div>
+                    <div class="stat-label">Drug Interactions</div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">24/7</div>
+                    <div class="stat-label">Real-time Updates</div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">99.9%</div>
+                    <div class="stat-label">Data Accuracy</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <a href="#" class="action-btn">
+            <i class="fas fa-history"></i>
+            Search History
+        </a>
+        <a href="#" class="action-btn">
+            <i class="fas fa-bookmark"></i>
+            Saved Searches
+        </a>
+        <a href="#" class="action-btn">
+            <i class="fas fa-bell"></i>
+            Drug Alerts
+        </a>
+        <a href="#" class="action-btn">
+            <i class="fas fa-download"></i>
+            Export Data
+        </a>
+    </div>
+
+    <div class="recent-searches">
+        <h3><i class="fas fa-history"></i> Recent Searches</h3>
+        <div class="search-history">
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <p>No recent searches yet. Start by searching for a medication above.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="user-profile">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {{ current_user.username[0].upper() }}
+            </div>
+            <div class="profile-info">
+                <h3>{{ current_user.username }}</h3>
+                <p>Medical Professional</p>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <a href="{{ url_for('main.profile') }}" class="profile-btn">
+                <i class="fas fa-user-edit"></i>
+                Edit Profile
+            </a>
+            <a href="#" class="profile-btn">
+                <i class="fas fa-cog"></i>
+                Settings
+            </a>
+            <a href="{{ url_for('main.logout') }}" class="profile-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </div>
+    </div>
 </div>
+
+<script>
+    function fillSearch(drugName) {
+        document.getElementById('query').value = drugName;
+        document.getElementById('query').focus();
+    }
+
+    // Form submission with loading state
+    document.getElementById('searchForm').addEventListener('submit', function (e) {
+        const btn = document.getElementById('searchBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+
+        // Re-enable button after 3 seconds if form doesn't submit
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }, 3000);
+    });
+
+    // Auto-focus on search field
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('query').focus();
+    });
+
+    // Add search suggestions autocomplete
+    const searchInput = document.getElementById('query');
+    const suggestions = ['aspirin', 'ibuprofen', 'acetaminophen', 'lisinopril', 'metformin', 'omeprazole', 'atorvastatin', 'simvastatin', 'amlodipine', 'gabapentin'];
+
+    searchInput.addEventListener('input', function (e) {
+        const value = e.target.value.toLowerCase();
+        if (value.length > 2) {
+            const matches = suggestions.filter(drug => drug.includes(value));
+            // You can implement dropdown suggestions here
+        }
+    });
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function (e) {
+        if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('query').focus();
+        }
+    });
+</script>
 {% endblock %}

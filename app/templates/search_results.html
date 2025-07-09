@@ -1,29 +1,700 @@
 {% extends "base.html" %}
 
-{% block title %}Search Results - Med Info App{% endblock %}
+{% block title %}Search Results - MedInfo Pro{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2>Search Results for "{{ query }}"</h2>
+<style>
+    :root {
+        --primary-teal: #0f766e;
+        --primary-green: #047857;
+        --primary-red: #dc2626;
+        --primary-blue: #1e40af;
+        --bg-white: #ffffff;
+        --bg-gray: #f8fafc;
+        --text-black: #1f2937;
+        --text-gray: #6b7280;
+        --border-gray: #e5e7eb;
+        --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-    {% if results %}
-        <ul>
-            {% for med in results %}
-                <li>
-                    <strong>{{ med.name }}</strong><br>
-                    <small><strong>Indications:</strong> {{ med.indications }}</small><br>
-                    <small><strong>Adult Dosage:</strong> {{ med.dosage.adult if med.dosage.adult else 'N/A' }}</small><br>
-                    <small><strong>Contraindications:</strong> {{ med.contraindications }}</small>
-                </li>
-                <br>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No medicines found matching your search.</p>
-    {% endif %}
+    .results-container {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
 
-    <br>
-    <a href="{{ url_for('main.dashboard') }}" class="button-link">New Search</a>
+    .results-header {
+        background: var(--bg-white);
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-gray);
+        margin-bottom: 1.5rem;
+        border-top: 4px solid var(--primary-teal);
+    }
+
+    .results-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-black);
+        margin-bottom: 0.5rem;
+    }
+
+    .results-subtitle {
+        color: var(--text-gray);
+        font-size: 0.95rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .new-search-form {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .new-search-input {
+        flex: 1;
+        padding: 0.625rem 1rem;
+        border: 2px solid var(--border-gray);
+        border-radius: 4px;
+        background: var(--bg-white);
+        color: var(--text-black);
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease;
+    }
+
+    .new-search-input:focus {
+        outline: none;
+        border-color: var(--primary-teal);
+    }
+
+    .new-search-btn {
+        padding: 0.625rem 1.25rem;
+        background: var(--primary-teal);
+        border: none;
+        border-radius: 4px;
+        color: var(--bg-white);
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        white-space: nowrap;
+        font-size: 0.95rem;
+    }
+
+    .new-search-btn:hover {
+        background: #0d9488;
+    }
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .main-results {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .result-card {
+        background: var(--bg-white);
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-gray);
+        position: relative;
+    }
+
+    .result-card.fda-card {
+        border-top: 4px solid var(--primary-blue);
+    }
+
+    .result-card.interactions-card {
+        border-top: 4px solid var(--primary-red);
+    }
+
+    .result-card.error-card {
+        border-top: 4px solid var(--text-gray);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: var(--bg-white);
+        background: var(--primary-blue);
+    }
+
+    .card-icon.interactions-icon {
+        background: var(--primary-red);
+    }
+
+    .card-icon.error-icon {
+        background: var(--text-gray);
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-black);
+        margin: 0;
+    }
+
+    .drug-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .info-item {
+        background: var(--bg-gray);
+        padding: 1rem;
+        border-radius: 4px;
+        border: 1px solid var(--border-gray);
+    }
+
+    .info-label {
+        font-weight: 500;
+        color: var(--text-black);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        color: var(--text-gray);
+        line-height: 1.5;
+        font-size: 0.9rem;
+    }
+
+    .interactions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .interaction-item {
+        background: #fef2f2;
+        padding: 1rem;
+        border-radius: 4px;
+        border-left: 4px solid var(--primary-red);
+        position: relative;
+    }
+
+    .interaction-severity {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .interaction-severity.high {
+        background: #fecaca;
+        color: var(--primary-red);
+    }
+
+    .interaction-severity.medium {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .interaction-severity.low {
+        background: #d1fae5;
+        color: var(--primary-green);
+    }
+
+    .interaction-description {
+        color: var(--text-gray);
+        line-height: 1.5;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .sidebar-card {
+        background: var(--bg-white);
+        border-radius: 8px;
+        padding: 1.25rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border-gray);
+    }
+
+    .sidebar-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-black);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .action-item {
+        padding: 0.625rem;
+        background: var(--bg-gray);
+        border: 1px solid var(--border-gray);
+        border-radius: 4px;
+        color: var(--text-black);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .action-item:hover {
+        background: #f1f5f9;
+        border-color: var(--primary-teal);
+    }
+
+    .related-drugs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .related-drug {
+        background: var(--bg-gray);
+        color: var(--text-black);
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid var(--border-gray);
+    }
+
+    .related-drug:hover {
+        background: #f1f5f9;
+        border-color: var(--primary-teal);
+    }
+
+    .error-message {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-gray);
+    }
+
+    .error-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--text-gray);
+    }
+
+    .error-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-black);
+    }
+
+    .error-description {
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-teal);
+        color: var(--bg-white);
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        font-size: 0.9rem;
+    }
+
+    .back-btn:hover {
+        background: #0d9488;
+    }
+
+    .warning-banner {
+        background: #fef3c7;
+        border: 1px solid #fbbf24;
+        border-radius: 4px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .warning-icon {
+        color: #d97706;
+        font-size: 1.25rem;
+    }
+
+    .warning-text {
+        color: #92400e;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 968px) {
+        .results-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+            order: -1;
+        }
+
+        .new-search-form {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .new-search-input {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .results-container {
+            padding: 1rem;
+        }
+
+        .drug-info {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="results-container">
+    <div class="results-header">
+        <h1 class="results-title">
+            <i class="fas fa-search"></i>
+            Search Results for "{{ query }}"
+        </h1>
+        <p class="results-subtitle">
+            Comprehensive medical information from FDA databases and RxNorm
+        </p>
+
+        <form method="POST" action="{{ url_for('medicine.search') }}" class="new-search-form">
+            <input type="text" name="query" class="new-search-input" placeholder="Search for another medicine..."
+                value="{{ query }}">
+            <button type="submit" class="new-search-btn">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </form>
     </div>
-{% endblock %}
 
+    {% if error %}
+    <div class="result-card error-card">
+        <div class="card-header">
+            <div class="card-icon error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 class="card-title">No Results Found</h2>
+        </div>
+        <div class="error-message">
+            <div class="error-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3 class="error-title">{{ error }}</h3>
+            <p class="error-description">
+                Try checking the spelling, using a different drug name, or searching for a brand name instead of generic
+                name.
+            </p>
+            <a href="{{ url_for('main.dashboard') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="warning-banner">
+        <i class="fas fa-exclamation-triangle warning-icon"></i>
+        <div class="warning-text">
+            This information is for educational purposes only. Always consult with a healthcare professional before
+            making medical decisions.
+        </div>
+    </div>
+
+    <div class="results-grid">
+        <div class="main-results">
+            {% if fda %}
+            <div class="result-card fda-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <h2 class="card-title">FDA Drug Information</h2>
+                </div>
+
+                <div class="drug-info">
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-tag"></i>
+                            Brand Name
+                        </div>
+                        <div class="info-value">
+                            {{ fda.openfda.brand_name[0] if fda.openfda.brand_name else 'N/A' }}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-flask"></i>
+                            Generic Name
+                        </div>
+                        <div class="info-value">
+                            {{ fda.openfda.generic_name[0] if fda.openfda.generic_name else 'N/A' }}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-building"></i>
+                            Manufacturer
+                        </div>
+                        <div class="info-value">
+                            {{ fda.openfda.manufacturer_name[0] if fda.openfda.manufacturer_name else 'N/A' }}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-capsules"></i>
+                            Dosage Form
+                        </div>
+                        <div class="info-value">
+                            {{ fda.openfda.dosage_form[0] if fda.openfda.dosage_form else 'N/A' }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if fda.indications_and_usage %}
+                <div class="info-item" style="margin-bottom: 1rem;">
+                    <div class="info-label">
+                        <i class="fas fa-stethoscope"></i>
+                        Indications and Usage
+                    </div>
+                    <div class="info-value">
+                        {{ fda.indications_and_usage[0][:500] }}{{ '...' if fda.indications_and_usage[0]|length > 500 else '' }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if fda.contraindications %}
+                <div class="info-item" style="margin-bottom: 1rem;">
+                    <div class="info-label">
+                        <i class="fas fa-ban"></i>
+                        Contraindications
+                    </div>
+                    <div class="info-value">
+                        {{ fda.contraindications[0][:500] }}{{ '...' if fda.contraindications[0]|length > 500 else '' }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if fda.warnings %}
+                <div class="info-item" style="border-left: 4px solid var(--primary-red); background: #fef2f2;">
+                    <div class="info-label">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Warnings
+                    </div>
+                    <div class="info-value">
+                        {{ fda.warnings[0][:500] }}{{ '...' if fda.warnings[0]|length > 500 else '' }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if interactions %}
+            <div class="result-card interactions-card">
+                <div class="card-header">
+                    <div class="card-icon interactions-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h2 class="card-title">Drug Interactions</h2>
+                </div>
+
+                <div class="interactions-list">
+                    {% for interaction in interactions %}
+                    <div class="interaction-item">
+                        <div
+                            class="interaction-severity {{ interaction.severity.lower() if interaction.severity else 'medium' }}">
+                            {{ interaction.severity or 'Unknown' }}
+                        </div>
+                        <div class="interaction-description">
+                            {{ interaction.description }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if not fda and not interactions %}
+            <div class="result-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <h2 class="card-title">Limited Information Available</h2>
+                </div>
+                <div class="error-message">
+                    <div class="error-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3 class="error-title">Partial Results</h3>
+                    <p class="error-description">
+                        We found some information about "{{ query }}" but it may be incomplete.
+                        This could be due to the drug being recently approved, withdrawn from market,
+                        or having limited FDA data available.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">
+                    <i class="fas fa-tools"></i>
+                    Quick Actions
+                </h3>
+                <div class="action-list">
+                    <a href="{{ url_for('main.dashboard') }}" class="action-item">
+                        <i class="fas fa-search"></i>
+                        New Search
+                    </a>
+                    <a href="#" class="action-item">
+                        <i class="fas fa-bookmark"></i>
+                        Save Results
+                    </a>
+                    <a href="#" class="action-item">
+                        <i class="fas fa-download"></i>
+                        Export PDF
+                    </a>
+                    <a href="#" class="action-item">
+                        <i class="fas fa-share"></i>
+                        Share Results
+                    </a>
+                    <a href="#" class="action-item">
+                        <i class="fas fa-print"></i>
+                        Print
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">
+                    <i class="fas fa-pills"></i>
+                    Related Drugs
+                </h3>
+                <div class="related-drugs">
+                    <span class="related-drug" onclick="searchDrug('aspirin')">Aspirin</span>
+                    <span class="related-drug" onclick="searchDrug('ibuprofen')">Ibuprofen</span>
+                    <span class="related-drug" onclick="searchDrug('acetaminophen')">Acetaminophen</span>
+                    <span class="related-drug" onclick="searchDrug('naproxen')">Naproxen</span>
+                    <span class="related-drug" onclick="searchDrug('diclofenac')">Diclofenac</span>
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">
+                    <i class="fas fa-info-circle"></i>
+                    Important Notice
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-gray); line-height: 1.5;">
+                    This information is sourced from FDA databases and RxNorm. It should not replace
+                    professional medical advice. Always consult with a healthcare provider before
+                    starting, stopping, or changing any medication.
+                </p>
+            </div>
+
+            <div class="sidebar-card">
+                <h3 class="sidebar-title">
+                    <i class="fas fa-phone"></i>
+                    Need Help?
+                </h3>
+                <div class="action-list">
+                    <a href="#" class="action-item">
+                        <i class="fas fa-question-circle"></i>
+                        FAQ
+                    </a>
+                    <a href="#" class="action-item">
+                        <i class="fas fa-life-ring"></i>
+                        Support
+                    </a>
+                    <a href="#" class="action-item">
+                        <i class="fas fa-bug"></i>
+                        Report Issue
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function searchDrug(drugName) {
+        const form = document.querySelector('.new-search-form');
+        const input = form.querySelector('input[name="query"]');
+        input.value = drugName;
+        form.submit();
+    }
+
+    // Add smooth scrolling to top when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Add print functionality
+    function printResults() {
+        window.print();
+    }
+
+    // Add copy to clipboard functionality
+    function copyResults() {
+        const results = document.querySelector('.main-results').innerText;
+        navigator.clipboard.writeText(results).then(() => {
+            alert('Results copied to clipboard!');
+        });
+    }
+</script>
+{% endblock %}
